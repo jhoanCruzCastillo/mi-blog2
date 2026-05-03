@@ -53,3 +53,6 @@ docker exec blog_php php spark db:seed PostSeeder
 # Revertir migraciones
 docker exec blog_php php spark migrate:rollback
 ```
+
+git remote remove origin
+git remote add origin https://github.com/jhoanCruzCastillo/mi-blog2.git
