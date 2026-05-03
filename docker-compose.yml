@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+
+  # ── Frontend: Vue.js con Vite ──────────────────────────────
+  vue:
+    image: node:20-alpine
+    container_name: blog_vue
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "${VUE_PORT}:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+    networks:
+      - blog-network
+    depends_on:
+      - php
+
+  # ── Backend: PHP + Apache + CodeIgniter ───────────────────
+  php:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: blog_php
+    volumes:
+      - ./backend:/var/www/html
+    ports:
+      - "${PHP_PORT}:80"
+    environment:
+      - CI_ENVIRONMENT=development
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      - blog-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Base de datos: PostgreSQL ─────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: blog_postgres
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - blog-network
+
+volumes:
+  postgres_data:
+
+networks:
+  blog-network:
+    driver: bridge
