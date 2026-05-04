@@ -1,28 +1,3 @@
-<template>
-  <div>
-    <h1>Blog</h1>
-
-    <button @click="mostrarFormulario = true">Nuevo post</button>
-
-    <PostForm
-      v-if="mostrarFormulario"
-      :post="postSeleccionado"
-      @guardado="onGuardado"
-      @cancelar="onCancelar"
-    />
-
-    <div v-if="cargando">Cargando posts...</div>
-
-    <div v-for="post in posts" :key="post.id">
-      <h2>{{ post.title }}</h2>
-      <p>{{ post.content }}</p>
-      <small>Por {{ post.author }}</small>
-      <br>
-      <button @click="editar(post)">Editar</button>
-      <button @click="eliminar(post.id)">Eliminar</button>
-    </div>
-  </div>
-</template>
 
 <script>
 import { postService } from '../services/api.js'
@@ -46,6 +21,10 @@ export default {
   },
 
   methods: {
+    abrirFormulario() {
+    this.mostrarFormulario = true;
+    console.log("El valor de mostrarFormulario esfff:", this.mostrarFormulario);
+  },
     async cargarPosts() {
       this.cargando = true
       this.posts = await postService.getAll()
@@ -76,3 +55,29 @@ export default {
   }
 }
 </script>
+
+
+<template>
+  <div>
+    <h1>Blog</h1>
+
+    <button @click="abrirFormulario">Nuevo post</button>
+    <PostForm
+      v-if="mostrarFormulario"
+      :post="postSeleccionado"
+      @guardado="onGuardado"
+      @cancelar="onCancelar"
+    />
+
+    <div v-if="cargando">Cargando posts...</div>
+
+    <div v-for="post in posts" :key="post.id">
+      <h2>{{ post.title }}</h2>
+      <p>{{ post.content }}</p>
+      <small>Por {{ post.author }}</small>
+      <br />
+      <button @click="editar(post)">Editar</button>
+      <button @click="eliminar(post.id)">Eliminar</button>
+    </div>
+  </div>
+</template>
